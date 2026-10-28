@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Калькулятор тёплого пола — WÄRMEHAUS и Grand Meyer</title>
+  <meta name="description" content="Подбор электрического тёплого пола WÄRMEHAUS и Grand Meyer: мат, кабель или плёнка, шаг укладки, мощность и хватит ли её отопить комнату.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,560;7..72,650&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="top">
+    <div>
+      <p class="eyebrow">WÄRMEHAUS и Grand Meyer</p>
+      <h1>Калькулятор тёплого пола</h1>
+      <p class="lede">Введите комнату и покрытие. Калькулятор сам выберет мат, кабель или плёнку, посчитает шаг, контуры и скажет, хватит ли этого тепла.</p>
+    </div>
+    <div class="examples" id="examples"></div>
+  </header>
+
+  <div class="workspace">
+    <form class="sheet" id="form" data-area="obstacles" autocomplete="off">
+      <section class="block">
+        <h2>Комната</h2>
+        <div class="grid-2">
+          <label class="field" style="grid-column:1 / -1"><span>Помещение</span><select id="roomType"></select></label>
+          <label class="field"><span>Длина, м</span><input id="length" type="number" min="0.8" max="40" step="0.01" inputmode="decimal" required></label>
+          <label class="field"><span>Ширина, м</span><input id="width" type="number" min="0.8" max="40" step="0.01" inputmode="decimal" required></label>
+        </div>
+        <p class="hint">Размеры проще тянуть за стену на плане. Длина — это горизонталь, ширина — вертикаль. Город здесь не нужен: для пола в квартире важнее покрытие и мебель. Мороз на улице спрятан в уточнениях и влияет только на вопрос, отопит ли пол комнату один.</p>
+        <div class="field" style="margin-top:12px">
+          <span>Задача</span>
+          <div class="picks">
+            <label class="pick pick-wide"><input type="radio" name="goal" value="comfort" checked><b>Комфортный пол<small>Радиаторы остаются, пол просто тёплый</small></b></label>
+            <label class="pick pick-wide"><input type="radio" name="goal" value="main"><b>Основное отопление<small>Пол должен тянуть комнату сам</small></b></label>
+          </div>
+        </div>
+      </section>
+
+      <section class="block">
+        <h2>Где греть</h2>
+        <div class="picks" id="areaMode">
+          <label class="pick"><input type="radio" name="areaMode" value="obstacles" checked><span>Вычесть мебель</span></label>
+          <label class="pick"><input type="radio" name="areaMode" value="percent"><span>Доля площади</span></label>
+        </div>
+        <div class="area-percent">
+          <label class="field" style="margin-top:12px"><span>Сколько пола греем, %</span>
+            <span class="range-row"><input id="percentRange" type="range" min="40" max="100" value="80"><input id="percent" type="number" min="10" max="100" step="1" value="80"></span>
+          </label>
+          <p class="hint">Зона рисуется прямоугольником в центре комнаты. Под шкафы и ванну так лучше не считать: для них есть мебель на плане.</p>
+        </div>
+        <div class="area-obstacles">
+          <p class="hint">Ванна, шкаф и гарнитур ставятся прямо на плане: перетащите, потяните за угол, правой кнопкой удалите. Диван на ножках и стол сюда не добавляют.</p>
+          <div class="chips" id="obsChips"></div>
+        </div>
+      </section>
+
+      <section class="block">
+        <h2>Покрытие</h2>
+        <div class="picks" id="coverings"></div>
+      </section>
+
+      <section class="block">
+        <h2>Чем греть</h2>
+        <div class="picks">
+          <label class="pick"><input type="radio" name="system" value="auto" checked><span>Подобрать</span></label>
+          <label class="pick"><input type="radio" name="system" value="mat"><span>Мат</span></label>
+          <label class="pick"><input type="radio" name="system" value="cable"><span>Кабель</span></label>
+          <label class="pick"><input type="radio" name="system" value="film"><span>Плёнка</span></label>
+        </div>
+        <div class="field" style="margin-top:12px">
+          <span>Какую марку ставить первой</span>
+          <div class="picks">
+            <label class="pick"><input type="radio" name="brand" value="warmehaus" checked><span>Сначала WÄRMEHAUS</span></label>
+            <label class="pick"><input type="radio" name="brand" value="grandmeyer"><span>Сначала Grand Meyer</span></label>
+            <label class="pick"><input type="radio" name="brand" value="either"><span>Как посчитается</span></label>
+          </div>
+        </div>
+      </section>
+
+      <details class="more">
+        <summary>Уточнения <span>— город и утепление, только для проверки «отопит ли»</span></summary>
+        <p class="hint">Город задаёт мороз на улице. Он не выбирает кабель. Тепло квартиры уже сидит в утеплении стен и в том, что за полом и потолком. Для режима «просто тёплый пол» эти поля почти не двигают ответ.</p>
+        <div class="grid-3">
+          <label class="field"><span>Город, расчётный мороз</span><select id="cityId"></select></label>
+          <label class="field"><span>Высота потолка, м</span><input id="height" type="number" min="2.2" max="6" step="0.05" value="2.7"></label>
+          <label class="field"><span>Наружные стены</span>
+            <select id="exposure">
+              <option value="one">Одна, обычная комната</option>
+              <option value="two">Две, угол</option>
+              <option value="all">Все, отдельно</option>
+              <option value="none">Нет, внутри квартиры</option>
+            </select>
+          </label>
+          <label class="field"><span>Улица, если город не тот, °C</span><input id="outdoor" type="number" step="1" placeholder="из города"></label>
+          <label class="field"><span>Что сверху</span>
+            <select id="above">
+              <option value="heated">Тёплое помещение</option>
+              <option value="cold">Крыша или улица</option>
+              <option value="unknown">Не знаю</option>
+            </select>
+          </label>
+          <label class="field"><span>Что снизу</span>
+            <select id="below">
+              <option value="heated">Тёплое помещение</option>
+              <option value="unheated">Холодный подвал</option>
+              <option value="ground">Грунт или первый этаж</option>
+              <option value="outdoor">Улица, балкон</option>
+              <option value="unknown">Не знаю</option>
+            </select>
+          </label>
+          <label class="field"><span>Утепление стен</span>
+            <select id="insulation">
+              <option value="unknown">Не знаю</option>
+              <option value="poor">Слабое</option>
+              <option value="average">Обычное</option>
+              <option value="good">Хорошее</option>
+              <option value="excellent">Очень тёплый дом</option>
+            </select>
+          </label>
+          <label class="field"><span>Слой под нагревателем</span>
+            <select id="underlay">
+              <option value="unknown">Пока не решил</option>
+              <option value="none">Ничего, сразу на стяжку</option>
+              <option value="foil">Тонкая подложка 3 мм</option>
+              <option value="xps20">XPS около 20 мм</option>
+              <option value="xps50">XPS около 50 мм</option>
+            </select>
+          </label>
+          <label class="field"><span>Окна, м²</span><input id="windows" type="number" min="0" step="0.1" placeholder="посчитать самим"></label>
+          <label class="field"><span>Можно поднять пол</span>
+            <select id="screed">
+              <option value="unknown">Пока не знаю</option>
+              <option value="no">Нет, только тонкий монтаж</option>
+              <option value="yes">Да, будет стяжка</option>
+            </select>
+          </label>
+          <label class="field"><span>Напряжение</span>
+            <select id="voltage">
+              <option value="230">230 В</option>
+              <option value="220">220 В</option>
+            </select>
+          </label>
+          <label class="field"><span>Тариф, ₽ за кВт·ч</span><input id="tariff" type="number" min="0" step="0.1" placeholder="не считать деньги"></label>
+          <label class="field"><span>Стена терморегулятора</span>
+            <select id="statWall">
+              <option value="bottom">Снизу на плане</option>
+              <option value="top">Сверху на плане</option>
+              <option value="left">Слева</option>
+              <option value="right">Справа</option>
+            </select>
+          </label>
+          <label class="field"><span>Ширина плёнки</span>
+            <select id="filmWidth">
+              <option value="0.5">50 см</option>
+              <option value="1">100 см</option>
+            </select>
+          </label>
+          <label class="field"><span>Воздух в комнате, °C</span><input id="indoor" type="number" min="10" max="30" step="0.5" placeholder="по типу комнаты"></label>
+        </div>
+      </details>
+    </form>
+
+    <aside class="live" aria-label="План">
+      <div class="live-card">
+        <h2>План комнаты</h2>
+        <p class="hint">Тяните стену или угол. Правая кнопка: добавить угол, вырезать угол, поставить мебель. Клик по краю стены переносит регулятор. Шифт — шаг 1 см.</p>
+        <div class="palette" id="palette"></div>
+        <div id="livePlan"></div>
+        <div class="legend">
+          <span><i style="background:#c24d24"></i>нагреватель</span>
+          <span><i style="background:#d9cbb8"></i>мебель без ножек</span>
+          <span><i style="background:#241c14"></i>старт и регулятор</span>
+          <span><i style="background:#1f6a8a"></i>датчик у регулятора</span>
+        </div>
+        <div id="inspector" class="inspector" hidden>
+          <p id="inspName"></p>
+          <label>Длина, м <input id="inspW" class="insp" type="number" min="0.3" step="0.01"></label>
+          <label>Ширина, м <input id="inspH" class="insp" type="number" min="0.3" step="0.01"></label>
+          <button type="button" id="inspDel">Убрать</button>
+        </div>
+        <p class="live-line" id="liveLine">Считаем…</p>
+      </div>
+    </aside>
+  </div>
+
+  <section class="report" id="report" aria-live="polite"></section>
+  <button class="dock" id="dock" type="button" hidden>Смотреть ответ</button>
+  <div id="menu" class="menu" hidden></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/calc.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="js/edit.js"></script>
+  <script src="js/ui.js"></script>
+</body>
+</html>
